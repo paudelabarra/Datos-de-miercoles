@@ -61,15 +61,5 @@ anim_save("mapa.gif", unmapa)
 
 
 ```
-## Otro plot para probar
-```{r}
-ggplot(subset(suma, ISO_3DIGIT=="ARG"),
-      aes(ISO_3DIGIT, valor_importado_dolares))+
-  geom_point()+
-  transition_states(anio, state_length = 1)+
-  annotate("text",x=1, y=1, label='Año: {closest_state}')
 
-
-
-```
 
