@@ -22,7 +22,7 @@ library(RColorBrewer)
 comercio_hispanoamerica_mundo <- readr::read_csv("https://raw.githubusercontent.com/cienciadedatos/datos-de-miercoles/master/datos/2019/2019-05-01/comercio_hispanoamerica_mundo_agregado.csv")
 
 
-sudamerica <- st_read("C:/Ovalipes/GIS/.shp/SouthAmerica.shp", quiet = T)
+sudamerica <- st_read("SouthAmerica.shp", quiet = T)
 
 ```
 # Cuanta plata entra a cada pais?
