@@ -1,0 +1,75 @@
+---
+title: "Untitled"
+author: "de la Barra"
+date: "1 de mayo de 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library (tidyverse)
+library (ggplot2)
+library (gganimate)
+library (sf)
+library(RColorBrewer)
+
+```
+
+## Datos
+
+```{r datos}
+
+comercio_hispanoamerica_mundo <- readr::read_csv("https://raw.githubusercontent.com/cienciadedatos/datos-de-miercoles/master/datos/2019/2019-05-01/comercio_hispanoamerica_mundo_agregado.csv")
+
+
+sudamerica <- st_read("C:/Ovalipes/GIS/.shp/SouthAmerica.shp", quiet = T)
+
+```
+# Cuanta plata entra a cada pais?
+```{r separo datos}
+suma <- comercio_hispanoamerica_mundo %>% 
+  group_by(codigo_iso_origen, anio) %>% 
+  summarise(valor_importado_dolares=sum(valor_importado_dolares),
+            valor_exportado_dolares=sum(valor_exportado_dolares)) %>%
+  mutate(ISO_3DIGIT=toupper(codigo_iso_origen)) %>% 
+  mutate(diferencia = (valor_exportado_dolares-valor_importado_dolares)/1000000)
+
+#world_suma<- world %>% 
+ # left_join(suma, by= "sovereignt")
+
+sudamerica_suma <- sudamerica %>% 
+  left_join(suma, by= "ISO_3DIGIT")
+  
+```
+## Mapa 
+```{r}
+
+unmapa <- ggplot(sudamerica_suma) +
+  geom_sf(data=sudamerica)+
+  geom_sf(aes(fill=diferencia))+
+  theme_bw()+
+  #scale_fill_distiller(type= "div", na.value="gray99", palette = 8, direction = 1 )+
+  scale_fill_gradient2(low= "#d7191c", high= "#2b83ba",
+                       mid= "#ffffbf",na.value="gray99")+
+  transition_states(anio, state_length = 1)+
+  labs(title = "Diferencia entre exportado e importado",
+    subtitle = 'Año: {closest_state}', 
+    x = NULL, y = NULL, fill = "Millones de dolares")
+  
+
+anim_save("mapa.gif", unmapa)
+
+
+```
+## Otro plot para probar
+```{r}
+ggplot(subset(suma, ISO_3DIGIT=="ARG"),
+      aes(ISO_3DIGIT, valor_importado_dolares))+
+  geom_point()+
+  transition_states(anio, state_length = 1)+
+  annotate("text",x=1, y=1, label='Año: {closest_state}')
+
+
+
+```
+

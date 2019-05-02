@@ -1,0 +1,97 @@
+---
+title: "GOT"
+author: "de la Barra"
+date: "17 de abril de 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggthemes)
+library(wesanderson)
+
+```
+
+## R Markdown
+
+```{r veletas}
+dat <- read.csv("cambio_lealtades.csv")
+names(dat)[3] <- "fin_t0"
+dat$cambios <- rep(0)
+fin_temp <- dplyr::select(dat, starts_with("fin"))
+
+for(x in 1:nrow(dat)){
+  
+for (i in 1:ncol(fin_temp)){
+ 
+  b <- i+1
+  if (b>ncol(fin_temp)) break
+  y <- fin_temp[x, b]
+  a <- dat[x, "cambios"]
+  
+  if (y != fin_temp[x, i])  dat[x, "cambios"] <- a + 1
+  
+}
+}
+
+dat <- dat %>%
+  arrange(-cambios)%>%
+  distinct()
+
+
+veletas <- dat %>% 
+  filter(cambios>4)
+veletas$nombre <- as.ordered(veletas$nombre)%>%
+  fct_inorder(ordered = NA) 
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r plot veletas, echo=FALSE}
+ggplot(veletas, aes(nombre, cambios, fill=origen))+
+  labs(title="Quiénes son los más veletas en #GOT?",
+       subtitle = "Al final los Starks eran bastante traidores",
+       x= "Personaje",
+       y= "Cambios de bando",
+       fill="Casa de origen")+
+  geom_col()+
+  geom_point()+
+  scale_fill_manual(values=wes_palette(name="GrandBudapest1"))+
+  theme_base(base_size = 10)+
+  theme(axis.text.x = element_text(angle = 90, 
+                                   hjust = 1, vjust = 0))
+ggsave("traidores.jpg", dpi=96)  
+        
+```
+
+## Quienes son los mas fieles?
+
+```{r leales}
+leales <- dat%>%
+  filter(cambios<1)
+
+leales$nombre <- as.ordered(leales$nombre)%>%
+  fct_inorder(ordered = NA) 
+
+ggplot(leales, aes(nombre, cambios, color=origen))+
+  labs(title="Quiénes son los más leales en #GOT?",
+       subtitle = "Al final los Starks eran bastante traidores",
+       x= "Personaje",
+       y= "Cambios de bando",
+       fill="Casa de origen")+
+  geom_point()+
+  #scale_fill_manual(values=wes_palette(name="GrandBudapest1"))+
+  theme_base(base_size = 10)+
+  theme(axis.text.x = element_text(angle = 90, 
+                                   hjust = 1, vjust = 0))
+```
+```{r}
+ggplot(dat, aes(episodios, cambios, color=origen))+geom_point()+
+  theme_economist()
+
+```
+
